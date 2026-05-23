@@ -74,6 +74,12 @@ const esc = (s) =>
   String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
   );
+// Ensure an external URL has a protocol so it isn't treated as a relative path.
+const ext = (u) => {
+  const s = String(u ?? "").trim();
+  if (!s) return "";
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(s) || s.startsWith("mailto:") ? s : "https://" + s;
+};
 const s = () => DATA.site || {};
 const initials = (name) =>
   String(name || "?").trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -215,8 +221,8 @@ function viewPublicationDetail(id) {
   const p = DATA.publications.find((x) => x.id === id);
   if (!p) return `<p class="empty">Publication not found. <a href="#/publications">Back to publications</a></p>`;
   const links = [];
-  if (p.DOI) links.push(`<a class="btn" href="${esc(p.DOI)}" target="_blank" rel="noopener">DOI ↗</a>`);
-  if (p.Link) links.push(`<a class="btn ghost" href="${esc(p.Link)}" target="_blank" rel="noopener">View ↗</a>`);
+  if (p.DOI) links.push(`<a class="btn" href="${esc(ext(p.DOI))}" target="_blank" rel="noopener">DOI ↗</a>`);
+  if (p.Link) links.push(`<a class="btn ghost" href="${esc(ext(p.Link))}" target="_blank" rel="noopener">View ↗</a>`);
   return `
   <p style="margin-bottom:18px"><a href="#/publications">← Publications</a></p>
   ${p.Type ? `<span class="tag">${esc(p.Type)}</span>` : ""}
@@ -318,8 +324,8 @@ function viewMemberDetail(id) {
     ["Email", m.Email ? `<a href="mailto:${esc(m.Email)}">${esc(m.Email)}</a>` : ""],
     ["Research Interests", m["Research Interests"]],
     ["Current Position", m["Current Position"]],
-    ["Homepage", m.Homepage ? `<a href="${esc(m.Homepage)}" target="_blank" rel="noopener">${esc(m.Homepage)}</a>` : ""],
-    ["Google Scholar", m["Google Scholar"] ? `<a href="${esc(m["Google Scholar"])}" target="_blank" rel="noopener">Profile</a>` : ""],
+    ["Homepage", m.Homepage ? `<a href="${esc(ext(m.Homepage))}" target="_blank" rel="noopener">${esc(m.Homepage)}</a>` : ""],
+    ["Google Scholar", m["Google Scholar"] ? `<a href="${esc(ext(m["Google Scholar"]))}" target="_blank" rel="noopener">Profile</a>` : ""],
   ].filter(([, v]) => v);
 
   return `
